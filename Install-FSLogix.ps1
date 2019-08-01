@@ -1,14 +1,11 @@
+param(
+   [Parameter(Mandatory=$false, HelpMessage='The network path for profile disk storage.')]
+   [ValidateNotNullOrEmpty()]
+   [string]$ProfilesPath = "\\Path"
+)
+
 #Create FSLogix Directory
 New-Item -ItemType "Directory" -Path "C:\FSLogix"
-
-#Download and move AzCopy
-Invoke-WebRequest -Uri "https://aka.ms/downloadazcopy-v10-windows" -OutFile AzCopy.zip -UseBasicParsing
-
-#Expand Archive
-Expand-Archive ./AzCopy.zip ./AzCopy -Force
-
-#Move AzCopy to the destination you want to store it
-Get-ChildItem "./AzCopy/*/azcopy.exe" | Move-Item -Destination "C:\FSLogix\AzCopy.exe"
 
 # Copy FSLogix files from Azure storage to local directory
 Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/?linkid=2084562" -OutFile FSLogix.zip -UseBasicParsing
@@ -30,4 +27,4 @@ Start-Process $filepath $arguments -wait
 #Create FSLogix keys
 New-Item -Path "HKLM:\Software\FSLogix\" -Name "Profiles"
 New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" -Name "Enabled" -PropertyType "Dword" -Value 1
-New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" -Name "VHDLocations" -PropertyType MultiString -Value "Network path"
+New-ItemProperty -Path "HKLM:\Software\FSLogix\Profiles" -Name "VHDLocations" -PropertyType MultiString -Value $ProfilesPath
